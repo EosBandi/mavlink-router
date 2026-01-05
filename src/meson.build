@@ -1,5 +1,11 @@
 subdir('common')
 
+if get_option('static')
+  exe_link_args = ['-static']
+else
+  exe_link_args = []
+endif
+
 exe_mavlink_router = executable('mavlink-routerd',
         [
          'autolog.cpp',
@@ -23,6 +29,7 @@ exe_mavlink_router = executable('mavlink-routerd',
                 dep_thread,
         ],
         link_with: libcommon_private,
+        link_args: exe_link_args,
         install: true,
 )
 

@@ -73,6 +73,62 @@ Or in order to install to another root directory:
 
     $ sudo DESTDIR=/tmp/root/dir ninja -C build install
 
+### Static build
+
+If you need a statically linked binary (bundles libc and other libraries),
+Meson provides an option to request static linking. Note that static linking
+may fail or be undesirable on some systems (for example when using glibc;
+musl is more friendly to static builds). To build a static binary with this
+project:
+
+    $ meson setup build -Dstatic=true
+    $ ninja -C build
+
+Caveats:
+- Statically linking glibc-built systems can increase binary size and may
+  cause issues with NSS and DNS, or dynamic loader features.
+- You may need static versions of dependent libraries available (libm, librt,
+  pthreads). On many systems these are available as part of the standard
+  toolchain or via distro packages (eg. libc-static or glibc-static).
+
+### Cross-compilation for ARM7 platforms
+
+To cross-compile for ARM7/ARMv7 platforms (such as Raspberry Pi, embedded Linux
+devices, or other ARM-based systems), you'll need an ARM cross-compilation
+toolchain and a Meson cross-file. The project includes several example
+cross-compilation configurations in the root directory:
+
+- `meson-cross-armhf.ini` - For ARM hard-float (armhf) targets
+- `meson-cross-aarch64.ini` - For 64-bit ARM (aarch64) targets
+- `meson-cross-rockchip.ini` - For Rockchip ARM platforms
+
+Example cross-compilation workflow for ARM7 (armhf):
+
+    $ meson setup build --cross-file meson-cross-armhf.ini
+    $ ninja -C build
+
+For static builds on ARM7 platforms (useful for embedded systems):
+
+    $ meson setup build --cross-file meson-cross-armhf.ini -Dstatic=true
+    $ ninja -C build
+
+**Requirements for cross-compilation:**
+- ARM cross-compiler toolchain (e.g., `arm-linux-gnueabihf-gcc` for armhf)
+- Cross-compiled dependencies (libm, librt, pthreads) in your sysroot
+- Properly configured cross-file with correct paths to your toolchain and sysroot
+
+**Installing cross-compilation tools on Ubuntu/Debian:**
+
+    $ sudo apt install gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+
+**Note:** You may need to customize the cross-file to match your specific
+toolchain paths, sysroot location, and target architecture. The cross-files
+in the repository serve as templates that can be adapted to your build
+environment.
+
+For native compilation directly on an ARM7 device, simply follow the standard
+build instructions above without using a cross-file.
+
 
 ## Running
 

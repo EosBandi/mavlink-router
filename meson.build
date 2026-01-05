@@ -22,6 +22,22 @@ conf.set_quoted('PACKAGE', meson.project_name())
 cxx = meson.get_compiler('cpp')
 cc = meson.get_compiler('c')
 
+# Ensure POSIX AIO symbols are available by defining the feature macro
+# globally. This is required because config.h is force-included for all
+# translation units and feature macros must be defined before any system
+# header is included.
+add_project_arguments('-D_POSIX_C_SOURCE=199309L', language : 'c')
+add_project_arguments('-D_POSIX_C_SOURCE=199309L', language : 'cpp')
+
+# Optionally enable static linking of produced binaries
+build_static = get_option('static')
+if build_static
+    # Request static linking from the linker. This works on many Linux
+    # toolchains but may require static library versions to be available.
+    add_project_link_arguments('-static', language : 'c')
+    add_project_link_arguments('-static', language : 'cpp')
+endif
+
 # Mandatory dependencies
 dep_math = cxx.find_library('m')
 dep_rt = cxx.find_library('rt')
